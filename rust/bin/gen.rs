@@ -1,4 +1,4 @@
-use bleedthorn::{building::BuildingAttrs};
+use bleedthorn::building::BuildingAttrs;
 
 fn main() {
     let b = BuildingAttrs::rand();

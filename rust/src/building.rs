@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::{ops::Range, mem};
+use std::{mem, ops::Range};
 
 use crate::{material::pre::*, pre::*};
 

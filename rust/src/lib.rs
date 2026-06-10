@@ -46,5 +46,4 @@ impl Vec3 {
     pub fn rand((x, y, z): (Range<f32>, Range<f32>, Range<f32>)) -> Self {
         Self(HashFlt::rand(x), HashFlt::rand(y), HashFlt::rand(z))
     }
-
 }

@@ -1,4 +1,4 @@
-use std::{ops::Range, fmt};
+use std::{fmt, ops::Range};
 
 #[derive(Copy, Clone, PartialEq, Hash, Eq)]
 pub struct HashFlt(pub u32);
@@ -18,6 +18,12 @@ impl HashFlt {
 
 impl fmt::Debug for HashFlt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "0f{}", f32::from_bits(self.0))
+        write!(f, "0f{}", Into::<f32>::into(*self))
+    }
+}
+
+impl Into<f32> for HashFlt {
+    fn into(self) -> f32 {
+        f32::from_bits(self.0)
     }
 }

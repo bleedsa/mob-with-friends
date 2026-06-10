@@ -31,10 +31,31 @@ mk_constructions!(Construction => {
 });
 
 impl Construction {
+    #[inline(always)]
+    pub fn scene(&self) -> String {
+        "res://scenes/constructions/".to_owned() + self.path_part() + ".tscn"
+    }
+
+    #[inline(always)]
     pub fn load(&self) -> Gd<Node3D> {
-        let path = "res://scenes/constructions/".to_owned() + self.path_part();
+        let path = self.scene();
         let scene = load::<PackedScene>(&path);
         let node = (*scene).instantiate().unwrap();
         node.cast()
     }
 }
+
+/*
+#[derive(GodotClass)]
+#[class(base=Node)]
+pub struct GConstruction {
+    material: Option<Material>,
+    size: Option<Vec3>,
+    base: Base<Node>,
+}
+
+#[godot_api]
+impl INode for GConstruction {
+    fn init(base: 
+}
+*/
