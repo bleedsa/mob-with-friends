@@ -20,6 +20,7 @@ pub mod pre {
 }
 
 use flt::HashFlt;
+use std::ops::Range;
 
 struct BleedThorn;
 
@@ -35,10 +36,10 @@ impl Vec3 {
         Self(HashFlt::new(x), HashFlt::new(y), HashFlt::new(z))
     }
 
+    /** generate a random vector with values between the ranges specified in `ranges`. */
     #[inline(always)]
-    pub fn rand() -> Self {
-        let mut rng = rand::rng();
-        Self(HashFlt::rand(&mut rng), HashFlt::rand(&mut rng), HashFlt::rand(&mut rng))
+    pub fn rand((x, y, z): (Range<f32>, Range<f32>, Range<f32>)) -> Self {
+        Self(HashFlt::rand(x), HashFlt::rand(y), HashFlt::rand(z))
     }
 
 }

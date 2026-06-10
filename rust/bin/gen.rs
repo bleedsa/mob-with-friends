@@ -1,5 +1,7 @@
-use bleedthorn::material::{Material, Type};
+use bleedthorn::{building::BuildingAttrs};
 
 fn main() {
+    let b = BuildingAttrs::rand();
 
+    println!("{b:?}");
 }
