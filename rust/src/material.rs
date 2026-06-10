@@ -45,9 +45,11 @@ mk_types!(MaterialType, TYPE_VALIDS => {
     /* metal materials */
     Metals => [Iron, Copper, Gold, Silver, Platinum],
     /* materials that are used in the outside of buildings */
-    BuildingOuter => [Brick, GreyStone],
+    BuildingOuter => [Brick, GreyStone, Concrete],
     /* building floor materials */
-    BuildingFloor => [Brick, GreyStone, Concrete],
+    BuildingFloor => [Brick, GreyStone, Concrete, BlackTile, CheckeredTile],
+    /* tile materials */
+    Tiles => [BlackTile, CheckeredTile, BrickTile],
 });
 
 impl MaterialType {
@@ -67,6 +69,9 @@ mk_materials!(Material, MATERIAL_N, MATERIAL_IDS, MATERIAL_NAMES => {
     Silver is "silver",
     Platinum is "platinum",
     Concrete is "concrete",
+    BlackTile is "black tile",
+    CheckeredTile is "checkered tile",
+    BrickTile is "brick tile",
 });
 
 impl Material {

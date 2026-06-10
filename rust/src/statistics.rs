@@ -41,8 +41,8 @@ pub fn materials_rejected() -> usize {
 
 #[test]
 fn reject_a_material() {
-    new_material_rejected().unwrap();
-    assert_eq!(materials_rejected().unwrap(), 1);
+    new_material_rejected();
+    assert_eq!(materials_rejected(), 1);
 }
 
 mod export {

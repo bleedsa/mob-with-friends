@@ -36,6 +36,11 @@ impl Vec3 {
         Self(HashFlt::new(x), HashFlt::new(y), HashFlt::new(z))
     }
 
+    #[inline(always)]
+    pub fn zero() -> Self {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
     /** generate a random vector with values between the ranges specified in `ranges`. */
     #[inline(always)]
     pub fn rand((x, y, z): (Range<f32>, Range<f32>, Range<f32>)) -> Self {
