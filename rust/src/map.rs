@@ -155,6 +155,6 @@ impl Map {
 
     #[func]
     fn new_construction(&mut self) {
-        self.new_construction_(Vec3::new(0.0, 0.0, 0.0), Construction::Wall(Material::rand(), Vec3::new(1.0, 1.0, 1.0)));
+        self.new_construction_(Vec3::new(0.0, 0.5, 0.3), Construction::Wall(Material::rand(), Vec3::new(1.0, 1.0, 1.0)));
     }
 }

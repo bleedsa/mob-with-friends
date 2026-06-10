@@ -6,19 +6,20 @@ use crate::{material::Material, pre::*};
 macro_rules! mk_constructions {
     (@NilTy $t:ty) => { _ };
 
-    ($n:ident => { $($x:ident($($t:ty),*) => $y:expr),* $(,)* }) => {
-        /** a construction on the map */
+    ($n:ident => { $($x:ident($($t:ty),*)),* $(,)* }) => {
+        /** a construction on the map. stuff like walls and floors */
         #[derive(Copy, Clone, Debug, PartialEq)]
         pub enum $n {
             $($x($($t),*)),*
         }
 
         impl $n {
+            /** return the part of the path that is actually specified per item */
             #[inline(always)]
             pub fn path_part(&self) -> &'static str {
                 use $n::*;
                 match self {
-                    $($x($($crate::mk_constructions!(@NilTy $t)),*) => $y),*
+                    $($x($($crate::mk_constructions!(@NilTy $t)),*) => stringify!($x)),*
                 }
             }
         }
@@ -26,8 +27,8 @@ macro_rules! mk_constructions {
 }
 
 mk_constructions!(Construction => {
-    Wall(Material, Vec3) => "wall",
-    Floor(Material, Vec3) => "floor",
+    Wall(Material, Vec3),
+    Floor(Material, Vec3),
 });
 
 impl Construction {
