@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://bdsadlcklfke1"]
+
+[ext_resource type="Script" uid="uid://c3oaddhbb61lk" path="res://scripts/gui/world_gen.gd" id="1_wf88r"]
+[ext_resource type="PackedScene" uid="uid://5qeird7pm5ko" path="res://scenes/construction_manager.tscn" id="2_ia86d"]
+
+[node name="WorldGen" type="Node3D" unique_id=358463927]
+script = ExtResource("1_wf88r")
+
+[node name="ConstructionManager" parent="." unique_id=1586663862 instance=ExtResource("2_ia86d")]
+
+[node name="Map" type="Map" parent="." unique_id=1497813199]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=154164783]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.18112)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=715324081]
+transform = Transform3D(1, 0, 0, 0, 0.06841574, 0.99765694, 0, -0.99765694, 0.06841574, 0, 35.820423, 4.160294)
+
+[node name="Control" type="Control" parent="." unique_id=1204633666]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GenerateButton" type="Button" parent="Control" unique_id=1963895009]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 31.0
+offset_right = 129.0
+offset_bottom = 62.0
+text = "Generate"
+
+[node name="MaterialsRejected" type="Label" parent="Control" unique_id=1511804436]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[connection signal="pressed" from="Control/GenerateButton" to="." method="_on_generate_button_pressed"]

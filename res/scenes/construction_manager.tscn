@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://5qeird7pm5ko"]
+
+[ext_resource type="Script" uid="uid://dh62ero0pfwhw" path="res://scripts/construction_manager.gd" id="1_7lr76"]
+
+[node name="ConstructionManager" type="Node3D" unique_id=1586663862]
+script = ExtResource("1_7lr76")

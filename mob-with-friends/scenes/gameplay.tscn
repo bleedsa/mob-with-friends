@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://dm4atvqfymgru"]
-
-[ext_resource type="Script" uid="uid://q34wr4xb8v2f" path="res://scripts/gameplay.gd" id="1_7biu0"]
-
-[node name="Gameplay" type="Node3D" unique_id=1533620049]
-script = ExtResource("1_7biu0")
-
-[node name="Map" type="Map" parent="." unique_id=445496709]
