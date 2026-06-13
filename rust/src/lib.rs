@@ -5,7 +5,9 @@
 #![allow(non_snake_case)]
 #![allow(incomplete_features)]
 
+use flt::HashFlt;
 use godot::prelude::*;
+use std::ops::Range;
 
 pub mod building;
 pub mod construction;
@@ -16,11 +18,8 @@ pub mod material;
 pub mod statistics;
 
 pub mod pre {
-    pub use super::Vec3;
+    pub use super::{Vec3, idx_to_2d};
 }
-
-use flt::HashFlt;
-use std::ops::Range;
 
 struct BleedThorn;
 
@@ -46,4 +45,18 @@ impl Vec3 {
     pub fn rand((x, y, z): (Range<f32>, Range<f32>, Range<f32>)) -> Self {
         Self(HashFlt::rand(x), HashFlt::rand(y), HashFlt::rand(z))
     }
+}
+
+impl Into<Vector3> for Vec3 {
+    fn into(self) -> Vector3 {
+        Vector3 {
+            x: self.0.into(),
+            y: self.1.into(),
+            z: self.2.into(),
+        }
+    }
+}
+
+pub fn idx_to_2d(idx: usize, X: usize, Y: usize) -> (usize, usize) {
+    (idx / X, idx % Y)
 }

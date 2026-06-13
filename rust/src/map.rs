@@ -10,11 +10,15 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use crate::{construction::Construction, item::Item, pre::*, material::pre::*};
+use crate::{construction::Construction, item::Item, pre::*, building::pre::*};
 
 type MapId = u64;
 
-/** a map (ie key value pairs) of things on a map (ie where gameplay takes place). */
+/** a map (ie key value pairs) of things on a map (ie where gameplay takes place).
+ *
+ * a `MapMap` contains a map from `MapId`s to a position and item. This lets you
+ * position items on the map using unique ids. id handling is done automatically
+ * by the provided methods. */
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapMap<T>(pub HashMap<MapId, (Vec3, T)>, pub MapId)
 where
@@ -107,6 +111,7 @@ fn IndexMut_MapMap() {
 #[class(base=Node)]
 pub struct Map {
     pub constructions: MapMap<Construction>,
+    pub buildings: MapMap<Building>,
     pub items: MapMap<Item>,
     pub base: Base<Node>,
 }
@@ -129,6 +134,7 @@ impl INode for Map {
         Self {
             constructions: MapMap::new(),
             items: MapMap::new(),
+            buildings: MapMap::new(),
             base,
         }
     }
@@ -144,17 +150,19 @@ impl Map {
         let (p, c) = self.constructions[id];
         let mut node = c.load();
 
-        (*node).set_position(Vector3 {
-            x: p.0.into(),
-            y: p.1.into(),
-            z: p.2.into(),
-        });
+        (*node).set_position(p.into());
 
         node
     }
 
     #[func]
-    fn new_construction(&mut self) {
-        self.new_construction_(Vec3::new(0.0, 0.5, 0.3), Construction::Wall(Material::rand(), Vec3::new(1.0, 1.0, 1.0)));
+    fn generate(&mut self) {
+        let buildings_num = 100;
+
+        for i in 0..buildings_num {
+            let b = Building::rand();
+            let (x, y) = idx_to_2d(i, buildings_num/2, buildings_num/2);
+            self.buildings.add(Vec3::new(x as f32, y as f32, 0.0), b);
+        }
     }
 }

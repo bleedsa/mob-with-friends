@@ -27,7 +27,6 @@ macro_rules! mk_constructions {
 }
 
 mk_constructions!(Construction => {
-    Wall(Material, Vec3),
     Floor(Material, Vec3),
 });
 
@@ -57,6 +56,6 @@ pub struct GConstruction {
 
 #[godot_api]
 impl INode for GConstruction {
-    fn init(base: 
+    fn init(base:
 }
 */
