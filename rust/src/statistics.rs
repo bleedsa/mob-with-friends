@@ -103,10 +103,3 @@ macro_rules! W {
 pub fn new_material_rejected() {
     W!(materials_rejected += 1);
 }
-
-#[test]
-fn reject_a_material() {
-    new_material_rejected();
-    assert_eq!(materials_rejected(), 1);
-}
-

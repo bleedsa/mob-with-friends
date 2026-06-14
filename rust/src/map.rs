@@ -93,9 +93,10 @@ where
 fn add_to_MapMap() {
     let v = Vec3::new(0.0, 0.0, 0.0);
     let mut m = MapMap::<u8>::new();
-    let (_, x) = m.add(v, 100);
+    let id = m.add(v, 100);
+    let (_, x) = m[id];
 
-    assert_eq!(*x, 100);
+    assert_eq!(x, 100);
 }
 
 #[test]
@@ -162,7 +163,7 @@ impl Map {
         for i in 0..buildings_num {
             let b = Building::rand();
             let (x, y) = idx_to_2d(i, buildings_num/2, buildings_num/2);
-            self.buildings.add(Vec3::new(x as f32, y as f32, 0.0), b);
+            let id = self.buildings.add(Vec3::new(x as f32, 0.0, y as f32), b);
         }
     }
 }

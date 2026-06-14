@@ -31,12 +31,11 @@ pub struct Vec3(pub HashFlt, pub HashFlt, pub HashFlt);
 
 impl Vec3 {
     #[inline(always)]
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
         Self(HashFlt::new(x), HashFlt::new(y), HashFlt::new(z))
     }
 
-    #[inline(always)]
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self::new(0.0, 0.0, 0.0)
     }
 
@@ -44,6 +43,21 @@ impl Vec3 {
     #[inline(always)]
     pub fn rand((x, y, z): (Range<f32>, Range<f32>, Range<f32>)) -> Self {
         Self(HashFlt::rand(x), HashFlt::rand(y), HashFlt::rand(z))
+    }
+
+    #[inline(always)]
+    pub fn x(&self) -> f32 {
+        self.0.into()
+    }
+
+    #[inline(always)]
+    pub fn y(&self) -> f32 {
+        self.1.into()
+    }
+
+    #[inline(always)]
+    pub fn z(&self) -> f32 {
+        self.2.into()
     }
 }
 

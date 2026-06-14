@@ -27,6 +27,9 @@ macro_rules! mk_constructions {
 }
 
 mk_constructions!(Construction => {
+    /* material, size */
+    Wall(Material, Vec3),
+    /* material, size */
     Floor(Material, Vec3),
 });
 
@@ -42,6 +45,15 @@ impl Construction {
         let scene = load::<PackedScene>(&path);
         let node = (*scene).instantiate().unwrap();
         node.cast()
+    }
+
+    #[inline(always)]
+    pub fn is_wall(&self) -> bool {
+        if let Self::Wall(_, _) = self {
+            true
+        } else {
+            false
+        }
     }
 }
 

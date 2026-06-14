@@ -100,3 +100,9 @@ impl Material {
         }
     }
 }
+
+impl Default for Material {
+    fn default() -> Self {
+        Self::GreyStone
+    }
+}
