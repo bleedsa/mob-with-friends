@@ -1,7 +1,7 @@
-use bleedthorn::building::BuildingAttrs;
+use bleedthorn::building::Building;
 
 fn main() {
-    let b = BuildingAttrs::rand();
+    let b = Building::rand(0, std::ptr::null_mut());
 
     println!("{b:#?}");
 }

@@ -1,11 +1,16 @@
-use rand::Rng;
-use std::{mem, ops::Range};
 use godot::prelude::*;
+use rand::Rng;
+use std::{hint::likely, mem, ops::Range};
 
-use crate::{material::pre::*, pre::*, map::MapMap, construction::Construction};
+use crate::{
+    construction::Construction,
+    map::{Map, MapId, MapMap},
+    material::pre::*,
+    pre::*,
+};
 
 pub mod pre {
-    pub use super::{BuildingAttrs, FloorScheme, Building};
+    pub use super::{Building, BuildingAttrs, FloorScheme};
 }
 
 macro_rules! mk_floor_scheme {
@@ -47,22 +52,26 @@ impl FloorScheme {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct BuildingAttrs {
+    pub id: MapId,
     pub floors: u8,
     pub floor_scheme: FloorScheme,
-    pub floor_size: Vec3, 
+    pub floor_size: Vec3,
     pub outer_material: Material,
     pub floor_material: Material,
+    pub map: *mut Map,
 }
 
 impl BuildingAttrs {
-    pub fn rand() -> Self {
+    pub fn rand(id: MapId, map: *mut Map) -> Self {
         let floor_scheme = FloorScheme::rand();
         Self {
+            id,
             floors: rand::random_range(1..100),
             floor_scheme,
             floor_size: Vec3::rand(floor_scheme.dimension_ranges()),
             outer_material: Material::rand_type(MaterialType::BuildingOuter),
             floor_material: Material::rand_type(MaterialType::BuildingFloor),
+            map,
         }
     }
 }
@@ -70,11 +79,13 @@ impl BuildingAttrs {
 impl Default for BuildingAttrs {
     fn default() -> Self {
         Self {
+            id: 0,
             floors: 0,
             floor_scheme: FloorScheme::Uniform,
             floor_size: Vec3::zero(),
             outer_material: Material::default(),
             floor_material: Material::default(),
+            map: std::ptr::null_mut(),
         }
     }
 }
@@ -87,20 +98,12 @@ pub struct BuildingWall {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BuildingFloor {
-    pub attrs: *const BuildingAttrs,
     pub constructions: MapMap<Construction>,
+    pub height: f32,
+    pub attrs: *mut BuildingAttrs,
 }
 
 impl BuildingFloor {
-    /** make a vertical wall */
-    #[inline(always)]
-    pub fn mk_v_constructions(&mut self, len: usize, mut pos: Vec3, w: Construction) {
-        for i in 0..len {
-            self.constructions.add(pos, w);
-            pos.2 += 1.0;
-        }
-    }
-
     /** push walls in the `FloorScheme::Uniform` style */
     #[inline(always)]
     fn push_uniform_walls(&mut self) {
@@ -110,39 +113,54 @@ impl BuildingFloor {
         let w = Construction::Wall(attrs.outer_material, Vec3::new(1.0, 1.0, 1.0));
 
         let z = attrs.floor_size;
-        self.mk_v_constructions(z.z() as usize, Vec3::new(0.0, 0.0, 0.0), w);
-        self.mk_v_constructions(z.z() as usize, Vec3::new(z.x(), 0.0, 0.0), w);
+
+        /* lol */
+        let C = &raw mut self.constructions;
+
+        /* make a line of vertical walls */
+        let mk_v_w = |len: f32, mut pos: Vec3| {
+            for _ in 0..len as usize {
+                unsafe { (&mut *C).add_no_matching_pos(pos, w) };
+                pos.2 += 1.;
+            }
+        };
+
+        /* make a line of horizontal walls */
+        let mk_h_w = |len: f32, mut pos: Vec3| {
+            for _ in 0..len as usize {
+                unsafe { (&mut *C).add_no_matching_pos(pos, w) };
+                pos.0 += 1.;
+            }
+        };
+
+        /* verts */
+        mk_v_w(z.z(), Vec3::new(0., 0., 0.));
+        mk_v_w(z.z(), Vec3::new(z.x(), 0., 0.));
+
+        /* horizs */
+        mk_h_w(z.x(), Vec3::new(0., 0., 0.));
+        mk_h_w(z.x(), Vec3::new(0., 0., z.z()));
     }
 
-    pub fn rand(attrs: &mut BuildingAttrs) -> Self {
+    pub fn rand(attrs: *mut BuildingAttrs) -> Self {
         let mut this = Self {
-            attrs: &raw const *attrs,
+            attrs,
+            height: unsafe { (*attrs).floor_size.y() },
             constructions: MapMap::new(),
         };
 
-        /* TODO: impl other floor schemes */
-        attrs.floor_scheme = FloorScheme::Uniform;
+        unsafe {
+            /* TODO: impl other floor schemes */
+            (*attrs).floor_scheme = FloorScheme::Uniform;
 
-        match attrs.floor_scheme {
-            FloorScheme::Uniform => this.push_uniform_walls(),
-            _ => todo!(), 
-        };
+            match (*attrs).floor_scheme {
+                FloorScheme::Uniform => this.push_uniform_walls(),
+                _ => todo!(),
+            };
+        }
 
         this
     }
-}
-
-#[test]
-fn mk_uniform_walls() {
-    let mut a = BuildingAttrs::rand();
-    a.floor_size = Vec3::new(2.0, 1.0, 4.0);
-    a.floor_scheme = FloorScheme::Uniform;
-
-    let mut f = BuildingFloor::rand(&mut a);
-
-    let w_pos = f.constructions.iter()
-        .filter(|(_, (_, x))| x.is_wall())
-        .map(|(p, _)| *p);
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -152,23 +170,90 @@ pub struct Building {
 }
 
 impl Building {
-    #[inline(always)]
-    pub fn rand() -> Self {
-        let mut this = Self {
-            attrs: BuildingAttrs::rand(),
-            floors: Vec::new(),
-        };
-
-        for _ in 0..this.attrs.floors {
-            this.floors.push(BuildingFloor::rand(&mut this.attrs));
+   #[inline(always)]
+    pub fn map<F>(&self, f: F)
+    where
+        F: Fn(&mut Map) -> (),
+    {
+        let m = self.attrs.map;
+        if likely(m != std::ptr::null_mut()) {
+            unsafe { f(&mut *m) };
         }
+    }
 
-        this
+    pub fn rand(id: MapId, map: *mut Map) -> Self {
+        Self::rand_with_attrs(BuildingAttrs::rand(id, map))
+    }
+ 
+    #[inline(always)]
+    pub fn rand_with_attrs(attrs: BuildingAttrs) -> Self {
+        Self {
+            attrs,
+            floors: Vec::new(),
+        }
+    }
+
+
+    pub fn generate(&mut self) {
+        for f in 0..self.attrs.floors as u64 {
+            self.floors.push(BuildingFloor::rand(&raw mut self.attrs));
+
+            /* send signals */
+            self.map(|m| m.signals().on_new_floor().emit(self.attrs.id, f));
+            for (id, _) in self.floors[f as usize].constructions.iter() {
+                self.map(|m| {
+                    m.signals()
+                        .on_new_floor_construction()
+                        .emit(self.attrs.id, f, *id)
+                })
+            }
+        }
     }
 }
 
 #[test]
-fn generate_random_floors() {
-    let b = Building::rand();
+fn generate_uniform_floors() {
+    let b = Building::rand_with_attrs(BuildingAttrs {
+        floor_scheme: FloorScheme::Uniform,
+        floor_size: Vec3::new(3., 1., 4.),
+        ..BuildingAttrs::default()
+    });
     assert_eq!(b.floors.len(), b.attrs.floors.into());
+
+    for f in b.floors.iter() {
+        /* wall positions */
+        let mut w_pos: Vec<_> = f
+            .constructions
+            .iter()
+            .filter(|(_, (_, x))| x.is_wall())
+            .map(|(i, (p, _))| (*i, *p))
+            .collect();
+
+        /* sort by id */
+        w_pos.sort_by(|(q, _), (r, _)| q.cmp(r));
+
+        /* map out ids */
+        let w_pos: Vec<_> = w_pos.into_iter().map(|(_, x)| x).collect();
+
+        assert_eq!(
+            &w_pos,
+            &[
+                /* verts */
+                Vec3::zero(),
+                Vec3::new(0., 0., 1.),
+                Vec3::new(0., 0., 2.),
+                Vec3::new(0., 0., 3.),
+                Vec3::new(3., 0., 0.),
+                Vec3::new(3., 0., 1.),
+                Vec3::new(3., 0., 2.),
+                Vec3::new(3., 0., 3.),
+                /* horzs */
+                Vec3::new(1., 0., 0.),
+                Vec3::new(2., 0., 0.),
+                Vec3::new(0., 0., 4.),
+                Vec3::new(1., 0., 4.),
+                Vec3::new(2., 0., 4.),
+            ]
+        );
+    }
 }

@@ -1,4 +1,7 @@
-use std::{fmt, ops::{AddAssign, Range}};
+use std::{
+    fmt,
+    ops::{AddAssign, Range},
+};
 
 #[derive(Copy, Clone, PartialEq, Hash, Eq)]
 pub struct HashFlt(pub u32);

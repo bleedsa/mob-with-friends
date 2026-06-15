@@ -1,6 +1,7 @@
 #![feature(const_trait_impl)]
 #![feature(generic_const_exprs)]
 #![feature(macro_metavar_expr)]
+#![feature(likely_unlikely)]
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 #![allow(incomplete_features)]
@@ -68,6 +69,12 @@ impl Into<Vector3> for Vec3 {
             y: self.1.into(),
             z: self.2.into(),
         }
+    }
+}
+
+impl Into<Vector3> for &Vec3 {
+    fn into(self) -> Vector3 {
+        (*self).into()
     }
 }
 

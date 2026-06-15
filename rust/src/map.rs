@@ -6,13 +6,12 @@ use godot::{
 use std::{
     collections::HashMap,
     fmt::Debug,
-    hint::unreachable_unchecked,
     ops::{Index, IndexMut},
 };
 
-use crate::{construction::Construction, item::Item, pre::*, building::pre::*};
+use crate::{building::pre::*, construction::Construction, item::Item, pre::*};
 
-type MapId = u64;
+pub type MapId = u64;
 
 /** a map (ie key value pairs) of things on a map (ie where gameplay takes place).
  *
@@ -53,6 +52,24 @@ where
     pub fn iter(&self) -> impl Iterator<Item = (&MapId, &(Vec3, T))> {
         self.0.iter()
     }
+
+    #[inline(always)]
+    pub fn len(&self) -> u64 {
+        self.0.len() as u64
+    }
+
+    /** add an item, doing nothing if there is already something at that position */
+    pub fn add_no_matching_pos(&mut self, p: Vec3, x: T) -> MapId {
+        /* check if there's already something in this map at position p */
+        let mut it = self.0.iter_mut();
+        while let Some((i, (q, _))) = it.next() {
+            if &p == q {
+                return *i;
+            }
+        }
+
+        self.add(p, x)
+    }
 }
 
 impl<T> Index<MapId> for MapMap<T>
@@ -69,23 +86,11 @@ where
 
 impl<T> IndexMut<MapId> for MapMap<T>
 where
-    T: Clone + Debug + PartialEq + Default,
+    T: Clone + Debug + PartialEq,
 {
     #[inline(always)]
     fn index_mut(&mut self, index: MapId) -> &mut Self::Output {
-        let ptr = &raw mut self.0;
-        unsafe {
-            if let Some(x) = (*ptr).get_mut(&index) {
-                return x;
-            }
-
-            (*ptr).insert(index, (Vec3::zero(), T::default()));
-            if let Some(x) = (*ptr).get_mut(&index) {
-                x
-            } else {
-                unreachable_unchecked()
-            }
-        }
+        self.0.get_mut(&index).expect(&format!("no key {index} found"))
     }
 }
 
@@ -143,8 +148,21 @@ impl INode for Map {
 
 #[godot_api]
 impl Map {
+    /** on new construction not tied to a building */
     #[signal]
     fn on_new_construction(id: MapId);
+
+    /** when a new construction is made on a floor */
+    #[signal]
+    pub fn on_new_floor_construction(building: MapId, floor: u64, id: MapId);
+
+    /** when a new building is constructed */
+    #[signal]
+    pub fn on_new_building(building: MapId);
+
+    /** when a new floor is constructed in a building */
+    #[signal]
+    pub fn on_new_floor(building: MapId, floor: u64);
 
     #[func]
     fn load_construction(&self, id: MapId) -> Gd<Node3D> {
@@ -158,12 +176,71 @@ impl Map {
 
     #[func]
     fn generate(&mut self) {
-        let buildings_num = 100;
+        let buildings_num = 100usize;
 
         for i in 0..buildings_num {
-            let b = Building::rand();
-            let (x, y) = idx_to_2d(i, buildings_num/2, buildings_num/2);
+            let (x, y) = idx_to_2d(i, buildings_num / 2, buildings_num / 2);
+            let b = Building::rand(i as MapId, &raw mut *self);
             let id = self.buildings.add(Vec3::new(x as f32, 0.0, y as f32), b);
+            self.signals().on_new_building().emit(id);
+            self.buildings[id].1.generate();
         }
+    }
+
+    #[func]
+    fn buildings(&self) -> u64 {
+        self.buildings.len()
+    }
+
+    #[func]
+    fn floors(&self, building: MapId) -> u8 {
+        self.buildings[building].1.attrs.floors
+    }
+
+    #[func]
+    fn building_pos(&self, id: MapId) -> Vector3 {
+        self.buildings[id].0.into()
+    }
+
+    #[func]
+    fn floor_y(&self, b: MapId, f: u64) -> f32 {
+        let mut z = 0.;
+        let mut i = 0;
+
+        while i < f {
+            z += self.buildings[b].1.floors[f as usize].height;
+            i += 1;
+        }
+
+        z
+    }
+
+    #[func]
+    fn load_floor_construction(
+        &self,
+        building: MapId,
+        floor: u64,
+        construction: MapId,
+    ) -> Gd<Node3D> {
+        let b = &self.buildings[building].1;
+        let f = &b.floors[floor as usize];
+        let (p, c) = &f.constructions[construction];
+        let mut node = c.load();
+        (*node).set_position(p.into());
+        node
+    }
+
+    #[func]
+    fn load_floor_constructions(&self, building: MapId, floor: u64) -> Array<Gd<Node3D>> {
+        let f = &self.buildings[building].1.floors[floor as usize];
+        let mut r = Array::new();
+
+        for (i, (p, c)) in f.constructions.iter() {
+            let mut node = c.load();
+            (*node).set_position(p.into());
+            r.insert(*i as usize, &node);
+        }
+
+        r
     }
 }

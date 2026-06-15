@@ -2,11 +2,14 @@
 
 [ext_resource type="Script" uid="uid://c3oaddhbb61lk" path="res://scripts/gui/world_gen.gd" id="1_wf88r"]
 [ext_resource type="PackedScene" uid="uid://5qeird7pm5ko" path="res://scenes/construction_manager.tscn" id="2_ia86d"]
+[ext_resource type="PackedScene" uid="uid://8l1eq7cviw35" path="res://scenes/building_manager.tscn" id="3_tam1s"]
 
 [node name="WorldGen" type="Node3D" unique_id=358463927]
 script = ExtResource("1_wf88r")
 
 [node name="ConstructionManager" parent="." unique_id=1586663862 instance=ExtResource("2_ia86d")]
+
+[node name="BuildingManager" parent="." unique_id=1404305298 instance=ExtResource("3_tam1s")]
 
 [node name="Map" type="Map" parent="." unique_id=1497813199]
 
