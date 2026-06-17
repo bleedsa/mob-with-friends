@@ -179,7 +179,7 @@ impl Map {
         let buildings_num = 100usize;
 
         for i in 0..buildings_num {
-            let (x, y) = idx_to_2d(i, buildings_num / 2, buildings_num / 2);
+            let (x, y) = idx_to_2d(i, 10, 10);
             let b = Building::rand(i as MapId, &raw mut *self);
             let id = self.buildings.add(Vec3::new(x as f32, 0.0, y as f32), b);
             self.signals().on_new_building().emit(id);

@@ -15,7 +15,8 @@ script = ExtResource("1_wf88r")
 [node name="Map" type="Map" parent="." unique_id=1497813199]
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=154164783]
-transform = Transform3D(-0.059167057, 0.99824816, 0, -0.99824816, -0.059167057, 0, 0, 0, 1, -1398.5518, 378.71313, 1.18112)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.0548573)
+fov = 37.7
 script = ExtResource("4_ucsvp")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=715324081]
