@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c3oaddhbb61lk" path="res://scripts/gui/world_gen.gd" id="1_wf88r"]
 [ext_resource type="PackedScene" uid="uid://5qeird7pm5ko" path="res://scenes/construction_manager.tscn" id="2_ia86d"]
 [ext_resource type="PackedScene" uid="uid://8l1eq7cviw35" path="res://scenes/building_manager.tscn" id="3_tam1s"]
+[ext_resource type="Script" uid="uid://bjat8yb28diul" path="res://scripts/worldgen_camera.gd" id="4_ucsvp"]
 
 [node name="WorldGen" type="Node3D" unique_id=358463927]
 script = ExtResource("1_wf88r")
@@ -14,7 +15,8 @@ script = ExtResource("1_wf88r")
 [node name="Map" type="Map" parent="." unique_id=1497813199]
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=154164783]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.18112)
+transform = Transform3D(-0.059167057, 0.99824816, 0, -0.99824816, -0.059167057, 0, 0, 0, 1, -1398.5518, 378.71313, 1.18112)
+script = ExtResource("4_ucsvp")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=715324081]
 transform = Transform3D(1, 0, 0, 0, 0.06841574, 0.99765694, 0, -0.99765694, 0.06841574, 0, 35.820423, 4.160294)

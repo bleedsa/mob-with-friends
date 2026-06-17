@@ -193,20 +193,9 @@ impl Building {
         }
     }
 
-
     pub fn generate(&mut self) {
         for f in 0..self.attrs.floors as u64 {
             self.floors.push(BuildingFloor::rand(&raw mut self.attrs));
-
-            /* send signals */
-            self.map(|m| m.signals().on_new_floor().emit(self.attrs.id, f));
-            for (id, _) in self.floors[f as usize].constructions.iter() {
-                self.map(|m| {
-                    m.signals()
-                        .on_new_floor_construction()
-                        .emit(self.attrs.id, f, *id)
-                })
-            }
         }
     }
 }

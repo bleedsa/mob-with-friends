@@ -15,3 +15,4 @@ func _process(_delta: float) -> void:
 
 func _on_generate_button_pressed() -> void:
 	map.generate()
+	building_manager.update_all()

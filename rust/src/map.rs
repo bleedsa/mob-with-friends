@@ -203,6 +203,24 @@ impl Map {
     }
 
     #[func]
+    fn building_ids(&self) -> Array<i64> {
+        let mut r = Array::new();
+        for id in self.buildings.0.keys() {
+            r.push(*id as i64);
+        }
+        r
+    }
+
+    #[func]
+    fn construction_ids(&self, b: MapId, f: u64) -> Array<i64> {
+        let mut r = Array::new();
+        for id in self.buildings[b].1.floors[f as usize].constructions.0.keys() {
+            r.push(*id as i64);
+        }
+        r
+    }
+
+    #[func]
     fn floor_y(&self, b: MapId, f: u64) -> f32 {
         let mut z = 0.;
         let mut i = 0;
